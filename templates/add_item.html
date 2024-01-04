@@ -1,0 +1,94 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0" />
+		<title>Add Item</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+	</head>
+
+	<body class="bg-gray-100 p-8">
+		<div class="max-w-md mx-auto bg-white p-6 rounded shadow-md">
+			<h1 class="text-2xl font-bold mb-4">Add Item</h1>
+
+			<form
+				id="addItemForm"
+				method="post">
+				<label
+					for="itemName"
+					class="block text-gray-700 text-sm font-bold mb-2"
+					>Item Name:</label
+				>
+				<input
+					type="text"
+					id="itemName"
+					name="name"
+					class="border rounded w-full py-2 px-3 mb-3"
+					required />
+
+				<button
+					type="submit"
+					class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
+					Add Item
+				</button>
+			</form>
+
+			<div
+				id="successModal"
+				class="hidden fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+				<div class="bg-white p-6 rounded shadow-md">
+					<p class="text-2xl font-bold text-green-500">
+						Item Added Successfully!
+					</p>
+					<button
+						id="closeModal"
+						class="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
+						Close
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			document
+				.getElementById('addItemForm')
+				.addEventListener('submit', function (event) {
+					event.preventDefault();
+
+					var itemName = document.getElementById('itemName').value;
+
+					fetch('/api/add_item', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({ name: itemName }),
+					})
+						.then((response) => response.json())
+						.then((data) => {
+							console.log('Item added:', data);
+
+							document
+								.getElementById('successModal')
+								.classList.remove('hidden');
+						})
+						.catch((error) => {
+							console.error('Error adding item:', error);
+						});
+				});
+
+			document
+				.getElementById('closeModal')
+				.addEventListener('click', function () {
+					document.getElementById('successModal').classList.add('hidden');
+					document.getElementById('itemName').value = '';
+				});
+		</script>
+	</body>
+</html>

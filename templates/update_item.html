@@ -1,0 +1,105 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0" />
+		<title>Update Item</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+	</head>
+
+	<body class="bg-gray-100 p-8">
+		<div class="max-w-md mx-auto bg-white p-6 rounded shadow-md">
+			<h1 class="text-2xl font-bold mb-4">Update Item</h1>
+
+			<form
+				id="updateItemForm"
+				method="post">
+				<label
+					for="itemName"
+					class="block text-gray-700 text-sm font-bold mb-2"
+					>New Item Name:</label
+				>
+				<input
+					type="text"
+					id="itemName"
+					name="name"
+					class="border rounded w-full py-2 px-3 mb-3"
+					required
+					value="{{ item.name if item else '' }}" />
+
+				<button
+					type="submit"
+					class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
+					Update Item
+				</button>
+			</form>
+
+			<div
+				id="successModal"
+				class="hidden fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+				<div class="bg-white p-6 rounded shadow-md">
+					<p class="text-2xl font-bold text-green-500">
+						Item Updated Successfully!
+					</p>
+					<button
+						id="closeModal"
+						class="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
+						Close
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			function getParameterFromUrl() {
+				var urlParts = window.location.pathname.split('/');
+				var itemIdIndex = urlParts.indexOf('update_item') + 1;
+
+				if (itemIdIndex > 0 && itemIdIndex < urlParts.length) {
+					return urlParts[itemIdIndex];
+				} else {
+					return null;
+				}
+			}
+			document
+				.getElementById('updateItemForm')
+				.addEventListener('submit', function (event) {
+					event.preventDefault();
+
+					const itemName = document.getElementById('itemName').value;
+					var itemId = getParameterFromUrl();
+
+					fetch(`/api/items/${itemId}`, {
+						method: 'PUT',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({ name: itemName }),
+					})
+						.then((response) => response.json())
+						.then((data) => {
+							console.log('Item updated:', data);
+
+							document
+								.getElementById('successModal')
+								.classList.remove('hidden');
+						})
+						.catch((error) => {
+							console.error('Error updating item:', error);
+						});
+				});
+
+			document
+				.getElementById('closeModal')
+				.addEventListener('click', function () {
+					document.getElementById('successModal').classList.add('hidden');
+				});
+		</script>
+	</body>
+</html>
