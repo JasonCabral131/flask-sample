@@ -25,5 +25,27 @@ def get_item(item_id):
     else:
         return jsonify({'message': 'Item not found'}), 404
 
+@app.route('/api/items', methods=['POST'])
+def add_item():
+    data = request.get_json()
+    new_item = {'id': len(items) + 1, 'name': data['name']}
+    items.append(new_item)
+    return jsonify({'item': new_item}), 201
+
+@app.route('/api/items/<int:item_id>', methods=['PUT'])
+def update_item(item_id):
+    item = next((item for item in items if item['id'] == item_id), None)
+    if item:
+        data = request.get_json()
+        item['name'] = data['name']
+        return jsonify({'item': item})
+    return jsonify({'message': 'Item not found'}), 404
+
+@app.route('/api/items/<int:item_id>', methods=['DELETE'])
+def delete_item(item_id):
+    global items
+    items = [item for item in items if item['id'] != item_id]
+    return jsonify({'message': 'Item deleted'})
+
 if __name__ == '__main__':
     app.run(port=5000)
