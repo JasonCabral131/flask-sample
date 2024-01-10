@@ -11,3 +11,5 @@ def render_add_item_page():
 
 def render_update_item_page(item):
     return render_template('update_item.html', item=item)
+def render_recommendationMovies():
+    return render_template('recommendation.html')

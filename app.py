@@ -33,5 +33,13 @@ def update_item(item_id):
 def delete_item(item_id):
     return controllers.delete_item(item_id)
 
+@app.route("/api/recommendations", methods=['GET'])
+def get_recommendations():
+     return controllers.collaborativeFilteringLatestAndHighestMovieRatings()
+
+@app.route("/recommendations", methods=['GET'])
+def recommendations():
+     return controllers.recommendationView()
+
 if __name__ == '__main__':
     app.run(debug=True)

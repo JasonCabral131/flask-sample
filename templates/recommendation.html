@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <title>Movie Recommendations</title>
+    <style>
+        .star {
+            color: #FFD700;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="mx-auto bg-white p-4 rounded-md shadow relative ">
+        <h1 class="text-2xl font-bold mb-4">Top 10 Highest Rated Movies</h1>
+        <div id="loader-container" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden">
+            <div id="loader" class="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500 border-4"></div>
+        </div>
+        <label for="searchInput" class="mb-2 block">Search Movies:</label>
+        <input type="text" id="searchInput" class="border rounded px-2 py-1 mb-4">
+        <table class="min-w-full">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 border-b">Title</th>
+                    <th class="py-2 px-4 border-b">Genres</th>
+                    <th class="py-2 px-4 border-b">Rating</th>
+                </tr>
+            </thead>
+            <tbody id="movieList">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loaderContainer = document.getElementById('loader-container');
+            const movieList = document.getElementById('movieList');
+
+            loaderContainer.classList.remove('hidden');
+            const searchInput = document.getElementById('searchInput');
+
+            const debounce = (func, delay) => {
+                let timeoutId;
+                return (...args) => {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => {
+                        func(...args);
+                    }, delay);
+                };
+            };
+            fetchRecommendations();
+
+            const debouncedFetchRecommendations = debounce(fetchRecommendations, 300);
+
+            searchInput.addEventListener('input', function () {
+                loaderContainer.classList.remove('hidden');
+                debouncedFetchRecommendations();
+            });
+
+            function fetchRecommendations() {
+                const query = searchInput.value;
+                fetch(`/api/recommendations?query=${encodeURIComponent(query)}`, {
+                    method: 'GET',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    loaderContainer.classList.add('hidden');
+                    movieList.innerHTML = data.highest_ratings_movies.map(movie => `
+                        <tr>
+                            <td class="py-2 px-4 border-b">${movie.title}</td>
+                            <td class="py-2 px-4 border-b">${movie.genres}</td>
+                            <td class="py-2 px-4 border-b">${movie.rating ? movie.rating + " " + generateStarRating(movie.rating) : 0}</td>
+                        </tr>
+                    `).join('');
+                })
+                .catch(error => {
+                    loaderContainer.classList.add('hidden');
+                    console.error('Error:', error);
+                    movieList.innerHTML = `
+                        <tr>
+                            <td class="py-2 px-4 border-b" colspan="100%">Sorry no Data!</td>
+                        </tr>
+                    `;
+                });
+            }
+        });
+
+        function generateStarRating(rating) {
+            const maxRating = 5;
+            const fullStars = Math.floor(rating);
+            const remainder = rating - fullStars;
+            let starRating = '';
+
+            for (let i = 0; i < fullStars; i++) {
+                starRating += '<span class="star">&#9733;</span>';
+            }
+
+            if (remainder > 0) {
+                starRating += '<span class="star">&#9734;</span>';
+            }
+
+            for (let i = fullStars + 1; i < maxRating; i++) {
+                starRating += '<span class="star">&#9734;</span>';
+            }
+
+            return starRating;
+        }
+    </script>
+</body>
+</html>
